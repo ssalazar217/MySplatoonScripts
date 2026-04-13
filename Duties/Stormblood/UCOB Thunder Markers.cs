@@ -1,11 +1,12 @@
 using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Game.ClientState.Objects.Types;
+using ECommons;
+using ECommons.Configuration;
 using ECommons.DalamudServices;
+using ECommons.ExcelServices.TerritoryEnumeration;
+using ECommons.GameFunctions;
 using ECommons.ImGuiMethods;
 using Dalamud.Bindings.ImGui;
-using ECommons.Configuration;
-using ECommons.GameFunctions;
-using ECommons;
 using Splatoon.SplatoonScripting;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,22 +16,26 @@ namespace SplatoonScriptsOfficial.Duties.Stormblood
 {
     public class UCOB_Thunder_Markers : SplatoonScript
     {
-        public override HashSet<uint> ValidTerritories => new HashSet<uint>(); 
-        public override Metadata Metadata => new Metadata(1, "CantLoad");
+        public override HashSet<uint> ValidTerritories => [Raids.the_Unending_Coil_of_Bahamut_Ultimate];
+        public override Metadata? Metadata => new(1, "CantLoad");
 
         private Config Conf => Controller.GetConfig<Config>();
         private const uint THUNDER_ID = 466;
         private const uint TEST_ID = 50; 
-        private HashSet<uint> _markedPlayers = new HashSet<uint>();
+        private HashSet<uint> _markedPlayers = [];
         private bool _active = false;
 
         public override void OnSettingsDraw()
         {
             ImGui.Checkbox("Habilitar marcado automatico de Thunder", ref Conf.Enabled);
-            ImGui.Checkbox("MODO PRUEBA (Usa Sprint en cualquier zona)", ref Conf.TestMode);
+            ImGui.Checkbox("MODO PRUEBA (Usa Sprint)", ref Conf.TestMode);
             if (Conf.Enabled)
             {
-                ImGui.TextColored(new Vector4(1f, 1f, 0f, 1f), "Aviso: Evita que varios jugadores usen el script a la vez.");
+                ImGui.TextColored(new Vector4(1f, 1f, 0f, 1f), "Aviso: Evita que varios usuarios usen el script a la vez.");
+            }
+            if (Conf.TestMode)
+            {
+                ImGui.TextColored(new Vector4(1f, 0f, 0f, 1f), "ATENCION: El MODO PRUEBA requiere entrar en UCOB para que el script se cargue.");
             }
         }
 
@@ -63,7 +68,7 @@ namespace SplatoonScriptsOfficial.Duties.Stormblood
                     if (!_markedPlayers.Contains(player.EntityId))
                     {
                         string markerType = (i == 0) ? "attack1" : "attack2";
-                        Svc.Commands.ProcessCommand("/marker " + markerType + " \"" + player.Name + "\"");
+                        Svc.Commands.ProcessCommand($"/marker {markerType} \"{player.Name.ToString()}\"");
                         _markedPlayers.Add(player.EntityId);
                     }
                 }
@@ -71,21 +76,21 @@ namespace SplatoonScriptsOfficial.Duties.Stormblood
 
             if (_active)
             {
-                List<uint> toRemove = new List<uint>();
-                foreach (uint entityId in _markedPlayers)
+                var toRemove = new List<uint>();
+                foreach (var entityId in _markedPlayers)
                 {
                     if (!thunderPlayers.Any(p => p.EntityId == entityId))
                     {
                         var player = Svc.Objects.FirstOrDefault(o => o.EntityId == entityId);
                         if (player != null)
                         {
-                            Svc.Commands.ProcessCommand("/marker off \"" + player.Name + "\"");
+                            Svc.Commands.ProcessCommand($"/marker off \"{player.Name.ToString()}\"");
                         }
                         toRemove.Add(entityId);
                     }
                 }
 
-                foreach (uint id in toRemove)
+                foreach (var id in toRemove)
                 {
                     _markedPlayers.Remove(id);
                 }
