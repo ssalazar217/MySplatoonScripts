@@ -4,6 +4,8 @@ using ECommons.DalamudServices;
 using ECommons.ImGuiMethods;
 using Dalamud.Bindings.ImGui;
 using ECommons.Configuration;
+using ECommons.GameFunctions;
+using ECommons;
 using Splatoon.SplatoonScripting;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,18 +14,18 @@ namespace SplatoonScriptsOfficial.Duties.Stormblood;
 
 public class UCOB_Thunder_Markers : SplatoonScript
 {
-    public override HashSet<uint>? ValidTerritories => null; // Permitir todas las zonas para pruebas
+    public override HashSet<uint> ValidTerritories => null; 
     public override Metadata? Metadata => new(1, "Cant'Load");
 
     private Config Conf => Controller.GetConfig<Config>();
     private const uint THUNDER_ID = 466;
-    private const uint TEST_ID = 50; // Sprint
+    private const uint TEST_ID = 50; 
     private HashSet<uint> _markedPlayers = new();
     private bool _active = false;
 
     public override void OnSettingsDraw()
     {
-        ImGui.Checkbox("Habilitar marcado automático de Thunder", ref Conf.Enabled);
+        ImGui.Checkbox("Habilitar marcado automatico de Thunder", ref Conf.Enabled);
         ImGui.Checkbox("MODO PRUEBA (Usa Sprint en cualquier zona)", ref Conf.TestMode);
         if (Conf.Enabled)
         {
@@ -48,7 +50,7 @@ public class UCOB_Thunder_Markers : SplatoonScript
             .Where(p => p.GameObject is IBattleChara chara && chara.StatusList.Any(s => s.StatusId == statusId))
             .Select(p => p.GameObject as IPlayerCharacter)
             .Where(p => p != null)
-            .OrderBy(p => p.GetRole()) // Prioridad por Rol (Tanks=1, Healers=4, Melee=2, Ranged=3 en Dalamud enum? No, mejor ser explícito)
+            .OrderBy(p => p.GetRole()) 
             .ThenBy(p => p.Name.ToString())
             .ToList();
 
