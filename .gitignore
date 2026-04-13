@@ -1,0 +1,16 @@
+# Archivos de configuración de IDE y temporales
+.vs/
+.vscode/
+bin/
+obj/
+*.user
+*.suo
+*.sln.docstates
+
+# Archivos de sistema
+Thumbs.db
+Desktop.ini
+
+# Otros
+*.tmp
+*.bak
